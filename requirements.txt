@@ -1,0 +1,7 @@
+numpy 
+pyautogui
+opencv-python
+utilis 
+pyautogui
+struct
+pickle-mixin 
