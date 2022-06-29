@@ -5,6 +5,7 @@ github xlt3h
 
 import socket  
 import cv2
+import numpy as np
 
 class video_server:
     
@@ -40,17 +41,17 @@ class video_server:
         self.s.close()
         self.conn.close()
         #end of server
-
-    def client(self,host_c,port_c):
+    def client_host(self,host_c,port_c):
+        self.host_c = host_c
+        self.port_c = port_c
+        self.s_c = socket.socket()
+        self.s_c.connect((self.host_c,self.port_c))
+    def client(self):
         try:
-            self.host_c = host_c
-            self.port_c = port_c
-            self.s_c = socket.socket()
-            self.s_c.connect((self.host_c,self.port_c))
+           
             self.cap =cv2.VideoCapture(0)
             while True:
                 self.ret , self.photo= self.cap.read()
-
                 cv2.imwrite("img_1.jpg",self.photo)
                 self.file = open("img_1.jpg","rb")
                 self.img_data = self.file.read(2048000)
@@ -65,6 +66,22 @@ class video_server:
         cv2.destroyAllWindows()
         self.file.close()
         #end of client
+    def screen_record_live(self):
+        import pyautogui
+        while True:
+            self.img = pyautogui.screenshot()
+            self.frame = np.array(self.img)
+            self.frame = cv2.cvtColor(self.frame,cv2.COLOR_BGR2RGB)
+            self.img = cv2.imwrite("img_screenshot.jpg",self.frame)
+            self.file = open("img_screenshot.jpg","rb")
+            self.img_data = self.file.read(2048000)
+            self.s_c.send(self.img_data)
+            if cv2.waitKey(1) == ord('q'):
+                break
+        self.s_c.close()
+        self.cap.release()
+        cv2.destroyAllWindows()
+        self.file.close()
 
     def record_video(self,filename):
         self.fps = 60.0
